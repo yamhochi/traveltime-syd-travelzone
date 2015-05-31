@@ -12,46 +12,6 @@
         margin: 0;
       }
       
-      /*div.cartodb-infobox {
-         position: absolute;     
-          text-align: left;
-          line-height:1.5;     
-          width: 500px;          
-          height: auto; 
-          margin: 0px;        
-          padding: 4px;      
-          font-family:'Roboto', sans-serif;    
-          background: #f0f0f0;
-          box-shadow: 0px 0px 0px 0px rgba(#ffffff);
-        }
-
-        div.cartodb-infobox h1{*/
-          /*padding:10px;*/
-          /*line-height: 120%;
-          font-size:150%;
-          font-weight: 500;
-        }
-
-        div.cartodb-infobox h2{
-          padding-top:4px;
-          font-size:100%;
-          font-weight: 400;
-        }
-
-        div.cartodb-infobox h3{
-          font-size:100%;
-          padding-top:4px;
-          line-height: auto;
-          font-weight: 400;
-          font-weight:100;
-        }
-
-        div.cartodb-tooltip h4{
-          padding:0;
-          font-size:9px;
-          font-weight:100;
-          font-style:italic;
-        }*/
       div.cartodb-tooltip { 
             position: absolute;     
             text-align: left;
@@ -115,40 +75,29 @@
 	<script>
   
 		window.onload = function(){
-            // var map = new L.Map('map', {
-            //     center: [-33.8650, 151.2094],
-            //     zoom: 8
-            //   });
+
 
             var sql = new cartodb.SQL({ user: 'ay' });
             cartodb.createVis(map,  'http://ay.cartodb.com/api/v2/viz/8ec7b276-dcef-11e4-9dd0-0e018d66dc29/viz.json')
-                // .addTo(map)
                 .on('done', function(vis, layers) {
                   //do stuff
                   //define sublayer
                   var tz = layers[1].getSubLayer(0);
 
 //tz set
-                  // tz.setSQL("SELECT travel_zones_nsw_2006.cartodb_id, travel_zones_nsw_2006.the_geom, travel_zones_nsw_2006.the_geom_webmercator FROM travel_zones_nsw_2006");
-                  // tz.setSQL("SELECT travel_zones_nsw_2006.cartodb_id, travel_zones_nsw_2006.the_geom, travel_zones_nsw_2006.the_geom_webmercator, travel_zones_nsw_2006.tz06, car_tt.destination, car_tt.origin, car_tt.time FROM travel_zones_nsw_2006, car_tt WHERE travel_zones_nsw_2006.tz06=car_tt.origin"); 
+
                   tz.setCartoCSS("#travel_zones_nsw_2006{polygon-fill: #f2f0f7; polygon-opacity: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 1; }");
                   tz.setInteractivity("cartodb_id, tz06");
                   tz.setInteraction(true);
 
 //edu on
                   tz.on('featureClick', function(e, pos, latlng, data) {
-
-                    // console.log(vis.getOverlay('tooltip'))
-                    // //clean the previous fucking view
+                    // //clean the previous view
                     if(vis.getOverlay('tooltip')!==undefined){
                       vis.getOverlay('tooltip').clean()
                     }
                     var master=data.name
                     var selected=data.tz06
-                    // function header_name(master){
-                    //   return master
-                    // };
-                    // var header=header_name(master)
                     console.log(selected)
                     
                     tz.setSQL("SELECT travel_zones_nsw_2006.cartodb_id, travel_zones_nsw_2006.the_geom, travel_zones_nsw_2006.the_geom_webmercator, travel_zones_nsw_2006.tz06, car_tt.destination, car_tt.origin, car_tt.time FROM travel_zones_nsw_2006, car_tt WHERE travel_zones_nsw_2006.tz06=car_tt.origin AND destination="+selected);
@@ -157,8 +106,6 @@
 
                      var ggg = vis.addOverlay({
                           layer:tz,
-                          // type: 'infobox',
-                          // position: 'bottom|left',
                           type: 'tooltip',
                           position: 'top|right',
                           template: '<h2><b>Travel time by car: </b>{{time}}</h2>'
@@ -173,10 +120,6 @@
                   alert("some error occurred: " + err);
                 });
         
-
-        // function od_query(){
-
-        // }
 
             }
         

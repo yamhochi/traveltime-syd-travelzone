@@ -7,11 +7,12 @@
     <link href='http://fonts.googleapis.com/css?family=Roboto:100italic,400,500' rel='stylesheet' type='text/css'>
     <style>
       html, body, #map {
-        height: 600px;
+        height: 100%;
         padding: 0;
         margin: 0;
       }
       
+     
       div.cartodb-tooltip { 
             position: absolute;     
             text-align: left;
@@ -32,26 +33,22 @@
             font-weight: 500;
             z-index: 4;
         }
-
         div.cartodb-tooltip h1{
           padding:0;
           font-size:11px;
           font-weight: 500;
         }
-
         div.cartodb-tooltip h2{
           padding:0;
           font-size:10px;
           font-weight: 400;
         }
-
         div.cartodb-tooltip p{
           padding:0;
           font-size:9px;
           font-weight:100;
           font-style:italic;
         }
-
         div.cartodb-tooltip h3{
           padding:0;
           line-height:0.2;
@@ -64,55 +61,62 @@
 </head>
 <body>
 
-	<!-- <div id="overlay" style="height: 50px;">.</div> -->
-  <div style="height: 100px;">SGS header here</div>
+  <!-- <div id="overlay" style="height: 50px;">.</div> -->
+  <!-- <div style="height: 100px;">SGS header here</div> -->
   <div id="map"></div>
-  <div id="text"> Text goes here</div>
+  <!-- <div id="text"> Text goes here</div> -->
   <!-- <div id="overlay">.</div> -->
 
 
-	<script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
-	<script>
+  <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
+  <script>
   
-		window.onload = function(){
-
-
+    window.onload = function(){
+            // var map = new L.Map('map', {
+            //     center: [-33.8650, 151.2094],
+            //     zoom: 8
+            //   });
             var sql = new cartodb.SQL({ user: 'ay' });
-            cartodb.createVis(map,  'http://ay.cartodb.com/api/v2/viz/8ec7b276-dcef-11e4-9dd0-0e018d66dc29/viz.json')
+            cartodb.createVis(map,  'https://sgsep.cartodb.com/u/ay/api/v2/viz/ebd450fc-5227-11e5-9a93-0e9d821ea90d/viz.json')
+                // .addTo(map)
                 .on('done', function(vis, layers) {
                   //do stuff
                   //define sublayer
                   var tz = layers[1].getSubLayer(0);
-
 //tz set
-
-                  tz.setCartoCSS("#travel_zones_nsw_2006{polygon-fill: #f2f0f7; polygon-opacity: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 1; }");
+                  // tz.setSQL("SELECT travel_zones_nsw_2006.cartodb_id, travel_zones_nsw_2006.the_geom, travel_zones_nsw_2006.the_geom_webmercator FROM travel_zones_nsw_2006");
+                  tz.setSQL("SELECT travel_zones_nsw_2006.cartodb_id, travel_zones_nsw_2006.the_geom, travel_zones_nsw_2006.the_geom_webmercator, travel_zones_nsw_2006.tz06, car_tt.destination, car_tt.origin, car_tt.time FROM travel_zones_nsw_2006, car_tt WHERE travel_zones_nsw_2006.tz06=car_tt.origin AND destination="+1041);
+                  tz.setCartoCSS("#travel_zones_nsw_2006{polygon-fill:  #001a00; polygon-opacity: 0.8; polygon-comp-op: screen; line-color: #f2f0f7; line-width: 0.0; line-opacity: 0;} #car_tt [ time <= 60] {polygon-fill:  #4a1486; }#car_tt [ time <= 55] {polygon-fill:  #6a51a3; }#car_tt [ time <= 50] {polygon-fill:  #9e9ac8; }#car_tt [ time <= 45] {polygon-fill:  #bcbddc; }#car_tt [ time <= 40] {polygon-fill:  #dadaeb; }#car_tt [ time <= 35] {polygon-fill:  #edf8e9; } #car_tt [ time <= 30] {polygon-fill: #c7e9c0; } #car_tt [ time <= 25] {polygon-fill: #a1d99b; } #car_tt [ time <= 20] {polygon-fill: #74c476; } #car_tt [ time <= 15] {polygon-fill: #41ab5d; } #car_tt [ time <= 10] {polygon-fill: #238b45; } #car_tt[ time <= 5] {polygon-fill: #005a32} #car_tt[ time > 60] {polygon-fill:  #ffffff; polygon-opacity: 0.0}");
+                  // tz.setCartoCSS("#travel_zones_nsw_2006{polygon-fill: #001a00; polygon-opacity: 0.1; line-color: #FFF; line-width: 0.0; line-opacity: 1; }");
                   tz.setInteractivity("cartodb_id, tz06");
                   tz.setInteraction(true);
-
 //edu on
                   tz.on('featureClick', function(e, pos, latlng, data) {
-                    // //clean the previous view
+                    // console.log(vis.getOverlay('tooltip'))
+                    // //clean the previous fucking view
                     if(vis.getOverlay('tooltip')!==undefined){
                       vis.getOverlay('tooltip').clean()
                     }
                     var master=data.name
                     var selected=data.tz06
+                    // function header_name(master){
+                    //   return master
+                    // };
+                    // var header=header_name(master)
                     console.log(selected)
                     
                     tz.setSQL("SELECT travel_zones_nsw_2006.cartodb_id, travel_zones_nsw_2006.the_geom, travel_zones_nsw_2006.the_geom_webmercator, travel_zones_nsw_2006.tz06, car_tt.destination, car_tt.origin, car_tt.time FROM travel_zones_nsw_2006, car_tt WHERE travel_zones_nsw_2006.tz06=car_tt.origin AND destination="+selected);
-                    tz.setCartoCSS("#travel_zones_nsw_2006{polygon-fill: #f2f2f2; polygon-opacity: 0.4; polygon-comp-op: screen; line-color: #f2f0f7; line-width: 0.5; line-opacity: 1;}#car_tt [ time <= 60] {polygon-fill:  #4a1486; }#car_tt [ time <= 55] {polygon-fill:  #6a51a3; }#car_tt [ time <= 50] {polygon-fill:  #9e9ac8; }#car_tt [ time <= 45] {polygon-fill:  #bcbddc; }#car_tt [ time <= 40] {polygon-fill:  #dadaeb; }#car_tt [ time <= 35] {polygon-fill:  #edf8e9; } #car_tt [ time <= 30] {polygon-fill: #c7e9c0; } #car_tt [ time <= 25] {polygon-fill: #a1d99b; } #car_tt [ time <= 20] {polygon-fill: #74c476; } #car_tt [ time <= 15] {polygon-fill: #41ab5d; } #car_tt [ time <= 10] {polygon-fill: #238b45; } #car_tt[ time <= 5] {polygon-fill: #005a32}");
+                    tz.setCartoCSS("#travel_zones_nsw_2006{polygon-fill:  #001a00; polygon-opacity: 0.8; polygon-comp-op: screen; line-color: #f2f0f7; line-width: 0.0; line-opacity: 0;} #car_tt [ time <= 60] {polygon-fill:  #4a1486; }#car_tt [ time <= 55] {polygon-fill:  #6a51a3; }#car_tt [ time <= 50] {polygon-fill:  #9e9ac8; }#car_tt [ time <= 45] {polygon-fill:  #bcbddc; }#car_tt [ time <= 40] {polygon-fill:  #dadaeb; }#car_tt [ time <= 35] {polygon-fill:  #edf8e9; } #car_tt [ time <= 30] {polygon-fill: #c7e9c0; } #car_tt [ time <= 25] {polygon-fill: #a1d99b; } #car_tt [ time <= 20] {polygon-fill: #74c476; } #car_tt [ time <= 15] {polygon-fill: #41ab5d; } #car_tt [ time <= 10] {polygon-fill: #238b45; } #car_tt[ time <= 5] {polygon-fill: #005a32} #car_tt[ time > 60] {polygon-fill:  #ffffff; polygon-opacity: 0.0}");
                     tz.setInteractivity("cartodb_id, tz06, time");
-
                      var ggg = vis.addOverlay({
                           layer:tz,
+                          // type: 'infobox',
+                          // position: 'bottom|left',
                           type: 'tooltip',
                           position: 'top|right',
                           template: '<h2><b>Travel time by car: </b>{{time}}</h2>'
                         });
-
                        });
-
                   })
                 
                 //log error
@@ -120,14 +124,10 @@
                   alert("some error occurred: " + err);
                 });
         
-
+        // function od_query(){
+        // }
             }
         
-
-
-
-
-	</script>
+  </script>
 </body>
 </html>
-
